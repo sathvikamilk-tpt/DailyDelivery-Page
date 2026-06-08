@@ -1,0 +1,1905 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Milk Delivery Manager</title>
+  <meta name="theme-color" content="#0f172a" />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#11192d;
+      --panel2:#0f1724;
+      --line:#22304e;
+      --text:#e5eefc;
+      --muted:#97a7c3;
+      --accent:#68a6ff;
+      --accent2:#25c2a0;
+      --warn:#f4bf4f;
+      --danger:#ff7b7b;
+      --ok:#63d38a;
+      --shadow:0 10px 28px rgba(0,0,0,.25);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#09101f 0%, #0a1224 100%);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1400px;margin:0 auto;padding:14px}
+    .topbar{
+      display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .title{
+      display:flex;flex-direction:column;gap:6px;
+    }
+    h1{font-size:22px;margin:0}
+    .sub{color:var(--muted);font-size:13px;line-height:1.35}
+    .pillrow{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{
+      border:1px solid var(--line);background:rgba(255,255,255,.03);
+      padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted)
+    }
+    .grid{
+      display:grid;gap:12px;
+    }
+    .cards{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .card{
+      background:linear-gradient(180deg,rgba(17,25,45,.98),rgba(13,20,38,.98));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .card .body{padding:14px}
+    .stat{
+      display:flex;flex-direction:column;gap:4px;min-height:92px;
+    }
+    .stat .label{font-size:12px;color:var(--muted)}
+    .stat .value{font-size:24px;font-weight:700}
+    .stat .small{font-size:12px;color:var(--muted)}
+    .tabs{
+      display:flex;gap:8px;flex-wrap:wrap;
+      margin:12px 0;
+    }
+    .tab{
+      border:1px solid var(--line);
+      background:#10182d;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:13px;
+    }
+    .tab.active{background:var(--accent);border-color:var(--accent);color:#06111f}
+    .toolbar{
+      display:grid;grid-template-columns:repeat(1,minmax(0,1fr));
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .toolbar .row{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    @media (min-width:900px){
+      .cards{grid-template-columns:repeat(4,minmax(0,1fr));}
+      .toolbar{grid-template-columns:1.3fr .9fr .9fr 1.1fr}
+      .toolbar .row{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .split{grid-template-columns:1.2fr .8fr}
+      .customer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    input,select,textarea,button{
+      font:inherit;
+    }
+    input,select,textarea{
+      width:100%;
+      background:#0c1326;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+    }
+    textarea{min-height:84px;resize:vertical}
+    input::placeholder,textarea::placeholder{color:#6c7b96}
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+      display:block;
+    }
+    .formgrid{
+      display:grid;
+      grid-template-columns:repeat(1,minmax(0,1fr));
+      gap:10px;
+    }
+    @media (min-width:900px){
+      .formgrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+      .formgrid .wide{grid-column:span 2;}
+      .formgrid .full{grid-column:1/-1;}
+    }
+    .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 12px;
+      background:#17233f;
+      color:var(--text);
+      border:1px solid var(--line);
+      font-weight:650;
+    }
+    .primary{background:var(--accent);color:#06111f;border-color:var(--accent)}
+    .good{background:var(--ok);color:#06121a;border-color:var(--ok)}
+    .bad{background:var(--danger);color:#160607;border-color:var(--danger)}
+    .ghost{background:transparent}
+    .tiny{padding:7px 9px;font-size:12px;border-radius:10px}
+    .list{
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .rowcard{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .rowhead{
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;
+    }
+    .name{font-weight:750}
+    .meta{font-size:12px;color:var(--muted);line-height:1.4}
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;
+      border:1px solid var(--line);background:#0d1528;
+      white-space:nowrap;
+    }
+    .badge.active{color:var(--ok)}
+    .badge.paused{color:var(--warn)}
+    .badge.disabled{color:var(--danger)}
+    .badge.delivered{color:var(--ok)}
+    .badge.pending{color:var(--warn)}
+    .badge.missed{color:var(--danger)}
+    .badge.auto{color:var(--accent)}
+    .badge.manual{color:#d8e4ff}
+    .split{display:grid;grid-template-columns:1fr;gap:12px}
+    .section-title{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      margin:0 0 10px;
+    }
+    h2,h3{margin:0}
+    h2{font-size:18px}
+    h3{font-size:15px}
+    .muted{color:var(--muted)}
+    .subtle{font-size:12px;color:var(--muted)}
+    .searchline{
+      display:grid;grid-template-columns:1fr;gap:10px;
+    }
+    @media (min-width:900px){
+      .searchline{grid-template-columns:1.3fr .7fr .7fr .7fr}
+    }
+    .hide{display:none !important}
+    .record-actions,.customer-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .two-cols{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:1100px){
+      .two-cols{grid-template-columns:1fr 1fr}
+    }
+    .summaryline{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .smallgrid{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px
+    }
+    @media (min-width:900px){
+      .smallgrid{grid-template-columns:repeat(4,minmax(0,1fr));}
+    }
+    .hint{font-size:12px;color:var(--muted);line-height:1.35}
+    .dangerzone{border:1px dashed rgba(255,123,123,.6);padding:12px;border-radius:16px}
+    .footer-note{font-size:12px;color:var(--muted);padding:10px 0 6px}
+    .nowrap{white-space:nowrap}
+    .record-editor{
+      border-top:1px solid var(--line);
+      padding-top:12px;
+      margin-top:12px;
+    }
+    .kpi{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#0c1326;
+      font-size:13px;
+    }
+    .kpi strong{font-size:14px}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+    .inline{
+      display:flex;gap:8px;align-items:center;flex-wrap:wrap
+    }
+    .statusbar{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .pre{
+      white-space:pre-wrap;background:#0c1326;border:1px solid var(--line);
+      padding:10px;border-radius:12px;font-size:12px;color:#d5def0;
+    }
+    .toggle{
+      display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)
+    }
+    .toggle input{width:auto}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">
+      <h1>Milk Delivery Manager</h1>
+      <div class="sub">Local-first, mobile-friendly milk delivery tracker with schedules, monthly bills, pause ranges, export/import, and optional backup hooks.</div>
+      <div class="pillrow">
+        <div class="pill" id="storagePill">Storage: checking…</div>
+        <div class="pill" id="refreshPill">Auto refresh: on load</div>
+        <div class="pill" id="backupPill">Backup: local export</div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="primary" id="persistBtn">Enable safe storage</button>
+      <button id="exportBtn">Export JSON</button>
+      <label class="btnLike" style="display:inline-flex;align-items:center;gap:0">
+        <input id="importInput" type="file" accept="application/json" style="display:none">
+        <button id="importBtn">Import JSON</button>
+      </label>
+      <button id="downloadTodayBtn">Backup now</button>
+    </div>
+  </div>
+
+  <div class="grid cards">
+    <div class="card"><div class="body stat"><div class="label">Today morning deliveries</div><div class="value" id="kpiMorning">0</div><div class="small" id="kpiMorningSmall">0 pending</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Today evening deliveries</div><div class="value" id="kpiEvening">0</div><div class="small" id="kpiEveningSmall">0 pending</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Missed today</div><div class="value" id="kpiMissed">0</div><div class="small">records marked missed</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Paused today</div><div class="value" id="kpiPaused">0</div><div class="small">within pause range</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Active customers</div><div class="value" id="kpiActive">0</div><div class="small">delivering now</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Disabled customers</div><div class="value" id="kpiDisabled">0</div><div class="small">hidden from active lists</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Daily total</div><div class="value" id="kpiDailyTotal">₹0</div><div class="small" id="kpiDailyQty">0 litres</div></div></div>
+    <div class="card"><div class="body stat"><div class="label">Monthly total</div><div class="value" id="kpiMonthlyTotal">₹0</div><div class="small" id="kpiMonthlyQty">0 litres</div></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="today">Today</button>
+    <button class="tab" data-tab="customers">Customers</button>
+    <button class="tab" data-tab="bills">Bills</button>
+    <button class="tab" data-tab="backup">Backup</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </div>
+
+  <div class="toolbar">
+    <div>
+      <span class="label">Quick search</span>
+      <input id="searchInput" placeholder="Search customer, address, note…" />
+    </div>
+    <div>
+      <span class="label">Date</span>
+      <div class="row">
+        <input id="dateInput" type="date" />
+        <button id="todayBtn">Today</button>
+      </div>
+    </div>
+    <div>
+      <span class="label">Month</span>
+      <input id="monthInput" type="month" />
+    </div>
+    <div>
+      <span class="label">Filters</span>
+      <div class="row">
+        <select id="shiftFilter">
+          <option value="all">All shifts</option>
+          <option value="Morning">Morning</option>
+          <option value="Evening">Evening</option>
+        </select>
+        <select id="statusFilter">
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="disabled">Disabled</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboardTab" class="tabpane">
+    <div class="split">
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Quick add customer</h2>
+            <span class="badge auto">Auto-generated schedule</span>
+          </div>
+          <div class="hint">Add a customer once. The app builds their monthly delivery records automatically from the schedule and backfills the current month.</div>
+          <div class="hr"></div>
+          <div class="formgrid">
+            <div>
+              <span class="label">Customer name</span>
+              <input id="custName" placeholder="Name" />
+            </div>
+            <div>
+              <span class="label">Phone (optional)</span>
+              <input id="custPhone" placeholder="Phone" />
+            </div>
+            <div>
+              <span class="label">Delivery shift</span>
+              <select id="custShift">
+                <option>Morning</option>
+                <option>Evening</option>
+              </select>
+            </div>
+            <div class="wide">
+              <span class="label">Address</span>
+              <input id="custAddress" placeholder="Address" />
+            </div>
+            <div>
+              <span class="label">Milk type</span>
+              <select id="custMilk">
+                <option value="cow">Cow</option>
+                <option value="buffalo">Buffalo</option>
+              </select>
+            </div>
+            <div>
+              <span class="label">Quantity (ml)</span>
+              <input id="custQty" type="number" min="500" step="500" value="500" />
+            </div>
+            <div>
+              <span class="label">Frequency (days)</span>
+              <input id="custFreq" type="number" min="1" step="1" value="1" />
+            </div>
+            <div>
+              <span class="label">Start date</span>
+              <input id="custStart" type="date" />
+            </div>
+            <div>
+              <span class="label">Status</span>
+              <select id="custStatus">
+                <option value="active">Active</option>
+                <option value="disabled">Disabled</option>
+              </select>
+            </div>
+            <div class="full">
+              <span class="label">Notes (optional)</span>
+              <textarea id="custNotes" placeholder="Gate code, timing, special request…"></textarea>
+            </div>
+            <div class="full">
+              <div class="btnrow">
+                <button class="primary" id="saveCustomerBtn">Save customer</button>
+                <button id="clearCustomerBtn">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="record-editor" id="pauseEditor">
+            <div class="section-title">
+              <h3>Pause / resume a customer</h3>
+              <span class="subtle">Pauses are date ranges. The app skips those dates and resumes automatically after the end date.</span>
+            </div>
+            <div class="formgrid">
+              <div>
+                <span class="label">Customer</span>
+                <select id="pauseCustomer"></select>
+              </div>
+              <div>
+                <span class="label">Pause start</span>
+                <input id="pauseStart" type="date" />
+              </div>
+              <div>
+                <span class="label">Pause end</span>
+                <input id="pauseEnd" type="date" />
+              </div>
+              <div class="full">
+                <div class="btnrow">
+                  <button id="addPauseBtn">Add pause range</button>
+                  <button id="removeLastPauseBtn">Remove last pause</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Today at a glance</h2>
+            <span class="badge" id="todayLabel">—</span>
+          </div>
+          <div class="smallgrid" id="todayGlance"></div>
+          <div class="hr"></div>
+          <div class="section-title">
+            <h3>Monthly customer bills</h3>
+            <span class="subtle">Copy a ready-made bill message per customer</span>
+          </div>
+          <div id="billPreviewShort" class="list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="todayTab" class="tabpane hide">
+    <div class="two-cols">
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Morning deliveries</h2>
+            <span class="badge active">Morning</span>
+          </div>
+          <div id="morningList" class="list"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Evening deliveries</h2>
+            <span class="badge active">Evening</span>
+          </div>
+          <div id="eveningList" class="list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="customersTab" class="tabpane hide">
+    <div class="card">
+      <div class="body">
+        <div class="section-title">
+          <h2>Customers</h2>
+          <span class="subtle">Edit any customer. Disabled customers remain stored but disappear from active delivery lists.</span>
+        </div>
+        <div class="list" id="customerList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="billsTab" class="tabpane hide">
+    <div class="two-cols">
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Monthly totals</h2>
+            <span class="badge auto" id="monthBadge">—</span>
+          </div>
+          <div id="monthlySummary"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Customer bills</h2>
+            <span class="subtle">Delivery count × packet rate</span>
+          </div>
+          <div class="list" id="billList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="backupTab" class="tabpane hide">
+    <div class="two-cols">
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Export / import</h2>
+            <span class="badge manual">Recoverable backup</span>
+          </div>
+          <div class="btnrow">
+            <button class="primary" id="downloadExportBtn">Download backup JSON</button>
+            <button id="copyBackupBtn">Copy backup to clipboard</button>
+            <button id="pasteImportBtn">Paste JSON restore</button>
+          </div>
+          <div class="hr"></div>
+          <div class="hint">
+            Export regularly. If the phone is lost, import the JSON on a new device to recover everything.
+          </div>
+          <div class="hr"></div>
+          <div class="dangerzone">
+            <div class="section-title">
+              <h3>Danger zone</h3>
+            </div>
+            <div class="hint">This removes all local data from this browser only. Export first.</div>
+            <div class="btnrow" style="margin-top:10px">
+              <button class="bad" id="wipeBtn">Erase local data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="body">
+          <div class="section-title">
+            <h2>Optional backup hook</h2>
+            <span class="badge auto">Google Drive ready</span>
+          </div>
+          <div class="hint">The app can send a JSON backup to a Google Apps Script web app URL. This is optional and free, but browser-only apps cannot guarantee true unattended nightly backup unless the browser is open around that time.</div>
+          <div class="hr"></div>
+          <div class="formgrid">
+            <div class="full">
+              <span class="label">Backup endpoint URL</span>
+              <input id="backupUrl" placeholder="Paste Google Apps Script web app URL" />
+            </div>
+            <div>
+              <span class="label">Enable nightly backup</span>
+              <select id="nightlyBackupEnabled">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+            <div>
+              <span class="label">Backup time</span>
+              <input id="backupTime" type="time" value="23:30" />
+            </div>
+            <div class="full">
+              <div class="btnrow">
+                <button id="saveBackupSettingsBtn">Save backup settings</button>
+                <button id="testBackupBtn">Test endpoint now</button>
+              </div>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="pre" id="backupStatus">No backup sent yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsTab" class="tabpane hide">
+    <div class="card">
+      <div class="body">
+        <div class="section-title">
+          <h2>Settings</h2>
+          <span class="subtle">Only practical controls.</span>
+        </div>
+        <div class="formgrid">
+          <div>
+            <span class="label">Morning refresh time</span>
+            <input id="morningRefresh" type="time" value="05:00" />
+          </div>
+          <div>
+            <span class="label">Evening refresh time</span>
+            <input id="eveningRefresh" type="time" value="17:00" />
+          </div>
+          <div>
+            <span class="label">Default month view</span>
+            <select id="defaultViewMode">
+              <option value="current">Current month</option>
+              <option value="today">Today</option>
+            </select>
+          </div>
+          <div class="full">
+            <span class="label">Notes</span>
+            <div class="hint">Morning/evening refresh is handled when the app is open. Records are also generated on load, so daily entries are ready without retyping.</div>
+          </div>
+          <div class="full">
+            <div class="btnrow">
+              <button class="primary" id="saveSettingsBtn">Save settings</button>
+              <button id="requestPersistBtn">Request persistent storage</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="body">
+      <div class="section-title">
+        <h2>Current day records</h2>
+        <div class="inline">
+          <span class="badge" id="selectedDateBadge">—</span>
+          <span class="badge" id="selectedMonthBadge">—</span>
+        </div>
+      </div>
+      <div class="hint">Click Delivered or Missed to mark daily status. Edit opens a record editor so you can change quantity, milk type, notes, or amount for old entries.</div>
+      <div id="dayRecordsAll" class="list" style="margin-top:12px"></div>
+
+      <div class="record-editor hide" id="recordEditorBox">
+        <div class="section-title">
+          <h3>Edit record</h3>
+          <span class="subtle" id="recordEditorLabel">—</span>
+        </div>
+        <div class="formgrid">
+          <div>
+            <span class="label">Status</span>
+            <select id="recordStatus">
+              <option value="pending">Pending</option>
+              <option value="delivered">Delivered</option>
+              <option value="missed">Missed</option>
+            </select>
+          </div>
+          <div>
+            <span class="label">Milk type</span>
+            <select id="recordMilk">
+              <option value="cow">Cow</option>
+              <option value="buffalo">Buffalo</option>
+            </select>
+          </div>
+          <div>
+            <span class="label">Shift</span>
+            <select id="recordShift">
+              <option value="Morning">Morning</option>
+              <option value="Evening">Evening</option>
+            </select>
+          </div>
+          <div>
+            <span class="label">Quantity (ml)</span>
+            <input id="recordQty" type="number" min="500" step="500" />
+          </div>
+          <div>
+            <span class="label">Amount (₹)</span>
+            <input id="recordAmount" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <span class="label">Delivery date</span>
+            <input id="recordDate" type="date" disabled />
+          </div>
+          <div class="full">
+            <span class="label">Notes</span>
+            <textarea id="recordNote" placeholder="Exception note…"></textarea>
+          </div>
+          <div class="full">
+            <div class="btnrow">
+              <button class="primary" id="saveRecordBtn">Save record</button>
+              <button id="closeRecordBtn">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">Tip: use Export backup JSON after each session. That gives you instant recovery on another phone or laptop.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const DB_NAME = 'milk_delivery_manager_db';
+  const DB_VERSION = 1;
+  const STORE = 'kv';
+  const APP_KEY = 'app_state';
+
+  const RATE_500 = { cow: 30, buffalo: 40 };
+
+  const els = {
+    storagePill: document.getElementById('storagePill'),
+    refreshPill: document.getElementById('refreshPill'),
+    backupPill: document.getElementById('backupPill'),
+    persistBtn: document.getElementById('persistBtn'),
+    exportBtn: document.getElementById('exportBtn'),
+    importBtn: document.getElementById('importBtn'),
+    importInput: document.getElementById('importInput'),
+    downloadTodayBtn: document.getElementById('downloadTodayBtn'),
+    searchInput: document.getElementById('searchInput'),
+    dateInput: document.getElementById('dateInput'),
+    monthInput: document.getElementById('monthInput'),
+    todayBtn: document.getElementById('todayBtn'),
+    shiftFilter: document.getElementById('shiftFilter'),
+    statusFilter: document.getElementById('statusFilter'),
+    tabButtons: [...document.querySelectorAll('.tab')],
+    tabs: {
+      dashboard: document.getElementById('dashboardTab'),
+      today: document.getElementById('todayTab'),
+      customers: document.getElementById('customersTab'),
+      bills: document.getElementById('billsTab'),
+      backup: document.getElementById('backupTab'),
+      settings: document.getElementById('settingsTab'),
+    },
+    saveCustomerBtn: document.getElementById('saveCustomerBtn'),
+    clearCustomerBtn: document.getElementById('clearCustomerBtn'),
+    custName: document.getElementById('custName'),
+    custPhone: document.getElementById('custPhone'),
+    custShift: document.getElementById('custShift'),
+    custAddress: document.getElementById('custAddress'),
+    custMilk: document.getElementById('custMilk'),
+    custQty: document.getElementById('custQty'),
+    custFreq: document.getElementById('custFreq'),
+    custStart: document.getElementById('custStart'),
+    custStatus: document.getElementById('custStatus'),
+    custNotes: document.getElementById('custNotes'),
+    pauseCustomer: document.getElementById('pauseCustomer'),
+    pauseStart: document.getElementById('pauseStart'),
+    pauseEnd: document.getElementById('pauseEnd'),
+    addPauseBtn: document.getElementById('addPauseBtn'),
+    removeLastPauseBtn: document.getElementById('removeLastPauseBtn'),
+    todayLabel: document.getElementById('todayLabel'),
+    todayGlance: document.getElementById('todayGlance'),
+    morningList: document.getElementById('morningList'),
+    eveningList: document.getElementById('eveningList'),
+    customerList: document.getElementById('customerList'),
+    billList: document.getElementById('billList'),
+    billPreviewShort: document.getElementById('billPreviewShort'),
+    monthlySummary: document.getElementById('monthlySummary'),
+    monthBadge: document.getElementById('monthBadge'),
+    backupUrl: document.getElementById('backupUrl'),
+    nightlyBackupEnabled: document.getElementById('nightlyBackupEnabled'),
+    backupTime: document.getElementById('backupTime'),
+    saveBackupSettingsBtn: document.getElementById('saveBackupSettingsBtn'),
+    testBackupBtn: document.getElementById('testBackupBtn'),
+    backupStatus: document.getElementById('backupStatus'),
+    morningRefresh: document.getElementById('morningRefresh'),
+    eveningRefresh: document.getElementById('eveningRefresh'),
+    defaultViewMode: document.getElementById('defaultViewMode'),
+    saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+    requestPersistBtn: document.getElementById('requestPersistBtn'),
+    kpiMorning: document.getElementById('kpiMorning'),
+    kpiMorningSmall: document.getElementById('kpiMorningSmall'),
+    kpiEvening: document.getElementById('kpiEvening'),
+    kpiEveningSmall: document.getElementById('kpiEveningSmall'),
+    kpiMissed: document.getElementById('kpiMissed'),
+    kpiPaused: document.getElementById('kpiPaused'),
+    kpiActive: document.getElementById('kpiActive'),
+    kpiDisabled: document.getElementById('kpiDisabled'),
+    kpiDailyTotal: document.getElementById('kpiDailyTotal'),
+    kpiDailyQty: document.getElementById('kpiDailyQty'),
+    kpiMonthlyTotal: document.getElementById('kpiMonthlyTotal'),
+    kpiMonthlyQty: document.getElementById('kpiMonthlyQty'),
+    selectedDateBadge: document.getElementById('selectedDateBadge'),
+    selectedMonthBadge: document.getElementById('selectedMonthBadge'),
+    recordEditorBox: document.getElementById('recordEditorBox'),
+    recordEditorLabel: document.getElementById('recordEditorLabel'),
+    recordStatus: document.getElementById('recordStatus'),
+    recordMilk: document.getElementById('recordMilk'),
+    recordShift: document.getElementById('recordShift'),
+    recordQty: document.getElementById('recordQty'),
+    recordAmount: document.getElementById('recordAmount'),
+    recordDate: document.getElementById('recordDate'),
+    recordNote: document.getElementById('recordNote'),
+    saveRecordBtn: document.getElementById('saveRecordBtn'),
+    closeRecordBtn: document.getElementById('closeRecordBtn'),
+    downloadExportBtn: document.getElementById('downloadExportBtn'),
+    copyBackupBtn: document.getElementById('copyBackupBtn'),
+    pasteImportBtn: document.getElementById('pasteImportBtn'),
+    wipeBtn: document.getElementById('wipeBtn'),
+    todayBtn2: document.getElementById('todayBtn'),
+  };
+
+  let db = null;
+  let state = null;
+  let currentTab = 'dashboard';
+  let editingCustomerId = null;
+  let editingRecordKey = null;
+  let autosaveTimer = null;
+  let backupTimer = null;
+  let lastBackupDate = '';
+  let persistGranted = false;
+
+  const defaultState = () => ({
+    customers: [],
+    records: {},
+    settings: {
+      morningRefresh: '05:00',
+      eveningRefresh: '17:00',
+      defaultViewMode: 'current',
+      backupUrl: '',
+      nightlyBackupEnabled: false,
+      backupTime: '23:30'
+    },
+    ui: {
+      search: '',
+      selectedDate: todayStr(),
+      selectedMonth: monthStr(todayStr()),
+      shiftFilter: 'all',
+      statusFilter: 'all'
+    },
+    meta: {
+      lastBackupAt: '',
+      lastSavedAt: '',
+      version: 1
+    }
+  });
+
+  function todayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function monthStr(dateStr) {
+    return dateStr.slice(0, 7);
+  }
+  function parseDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function toUTC(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return Date.UTC(y, m - 1, d);
+  }
+  function daysBetween(a, b) {
+    return Math.floor((toUTC(b) - toUTC(a)) / 86400000);
+  }
+  function addDays(dateStr, days) {
+    const d = parseDate(dateStr);
+    d.setDate(d.getDate() + days);
+    return dateToStr(d);
+  }
+  function dateToStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function monthBounds(month) {
+    const [y, m] = month.split('-').map(Number);
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 0);
+    return { start: dateToStr(start), end: dateToStr(end) };
+  }
+  function monthLabel(month) {
+    const [y, m] = month.split('-').map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  }
+  function fmtDate(dateStr) {
+    return parseDate(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  function fmtMoney(n) {
+    return `₹${Math.round(Number(n) || 0)}`;
+  }
+  function qtyLabel(ml) {
+    const liters = ml / 1000;
+    if (ml % 1000 === 0) return `${liters} L`;
+    if (ml === 500) return '500 ml';
+    return `${liters.toFixed(1).replace(/\.0$/, '')} L`;
+  }
+  function packetCount(ml) {
+    return ml / 500;
+  }
+  function rateFor(type) {
+    return RATE_500[type] || RATE_500.cow;
+  }
+  function calcAmount(ml, type) {
+    return (Number(ml) / 500) * rateFor(type);
+  }
+  function customerKey(customerId, dateStr) {
+    return `${customerId}|${dateStr}`;
+  }
+  function randomId() {
+    return 'c_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  }
+  function emptyString(v){ return (v ?? '').toString().trim(); }
+
+  async function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          db.createObjectStore(STORE);
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function dbGet(key) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const store = tx.objectStore(STORE);
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function dbSet(key, value) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const store = tx.objectStore(STORE);
+      store.put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function dbDelete(key) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const store = tx.objectStore(STORE);
+      store.delete(key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  function pauseRanges(customer) {
+    return Array.isArray(customer.pausePeriods) ? customer.pausePeriods : [];
+  }
+  function isPausedOn(customer, dateStr) {
+    return pauseRanges(customer).some(p => p.start && p.end && p.start <= dateStr && dateStr <= p.end);
+  }
+  function currentStatus(customer, dateStr = state.ui.selectedDate) {
+    if (customer.status === 'disabled') return 'disabled';
+    if (isPausedOn(customer, dateStr)) return 'paused';
+    return 'active';
+  }
+  function isDue(customer, dateStr) {
+    if (!customer.startDate || dateStr < customer.startDate) return false;
+    if (customer.status === 'disabled') return false;
+    if (isPausedOn(customer, dateStr)) return false;
+    const freq = Math.max(1, Number(customer.frequencyDays || 1));
+    return daysBetween(customer.startDate, dateStr) % freq === 0;
+  }
+  function recordDefault(customer, dateStr) {
+    const amount = calcAmount(customer.quantityMl, customer.milkType);
+    return {
+      customerId: customer.id,
+      date: dateStr,
+      shift: customer.shift,
+      milkType: customer.milkType,
+      quantityMl: customer.quantityMl,
+      amount,
+      status: 'pending',
+      note: '',
+      manual: false,
+      source: 'auto',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+  function monthRecordKeys(month, customerId) {
+    const { start, end } = monthBounds(month);
+    const keys = [];
+    for (let d = start; d <= end; d = addDays(d, 1)) {
+      keys.push(customerKey(customerId, d));
+    }
+    return keys;
+  }
+
+  function ensureMonthGenerated(month) {
+    const { start, end } = monthBounds(month);
+    const existingRecords = state.records || {};
+    for (const customer of state.customers) {
+      if (!customer || customer.deleted) continue;
+      const dueDates = new Set();
+      for (let d = start; d <= end; d = addDays(d, 1)) {
+        if (isDue(customer, d)) dueDates.add(d);
+        const key = customerKey(customer.id, d);
+        const existing = existingRecords[key];
+        if (!existing && dueDates.has(d)) {
+          existingRecords[key] = recordDefault(customer, d);
+        } else if (existing) {
+          if (existing.manual) continue;
+          if (existing.status === 'pending') {
+            if (dueDates.has(d)) {
+              existing.shift = customer.shift;
+              existing.milkType = customer.milkType;
+              existing.quantityMl = customer.quantityMl;
+              existing.amount = calcAmount(customer.quantityMl, customer.milkType);
+            } else if (month === state.ui.selectedMonth && month === monthStr(todayStr())) {
+              // Current month: remove auto pending records that no longer fit after schedule/status/pause changes.
+              delete existingRecords[key];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function pruneRecordsForCurrentMonth(month) {
+    // Explicit refresh for the current month only.
+    const { start, end } = monthBounds(month);
+    for (const customer of state.customers) {
+      for (let d = start; d <= end; d = addDays(d, 1)) {
+        const key = customerKey(customer.id, d);
+        const rec = state.records[key];
+        if (!rec) continue;
+        if (rec.manual) continue;
+        const shouldExist = isDue(customer, d);
+        if (!shouldExist && rec.status === 'pending') {
+          delete state.records[key];
+        } else if (shouldExist && rec.status === 'pending') {
+          rec.shift = customer.shift;
+          rec.milkType = customer.milkType;
+          rec.quantityMl = customer.quantityMl;
+          rec.amount = calcAmount(customer.quantityMl, customer.milkType);
+        }
+      }
+    }
+  }
+
+  function ensureCurrentMonth() {
+    const cm = monthStr(todayStr());
+    ensureMonthGenerated(cm);
+    pruneRecordsForCurrentMonth(cm);
+    state.ui.selectedMonth = state.ui.selectedMonth || cm;
+    if (!state.ui.selectedDate) state.ui.selectedDate = todayStr();
+  }
+
+  function getCustomer(id) {
+    return state.customers.find(c => c.id === id);
+  }
+
+  function recordsForMonth(month) {
+    const { start, end } = monthBounds(month);
+    return Object.values(state.records).filter(r => r.date >= start && r.date <= end);
+  }
+
+  function recordsForDate(dateStr) {
+    return Object.values(state.records).filter(r => r.date === dateStr);
+  }
+
+  function billTotalsForMonth(month) {
+    const rs = recordsForMonth(month).filter(r => r.status === 'delivered');
+    let total = 0;
+    let qty = 0;
+    for (const r of rs) {
+      total += Number(r.amount || 0);
+      qty += Number(r.quantityMl || 0);
+    }
+    return { total, qty, count: rs.length };
+  }
+
+  function totalsByCustomer(month) {
+    const groups = new Map();
+    for (const r of recordsForMonth(month)) {
+      if (!groups.has(r.customerId)) {
+        groups.set(r.customerId, { amount: 0, qty: 0, delivered: 0, missed: 0, pending: 0, records: [] });
+      }
+      const g = groups.get(r.customerId);
+      g.records.push(r);
+      if (r.status === 'delivered') {
+        g.amount += Number(r.amount || 0);
+        g.qty += Number(r.quantityMl || 0);
+        g.delivered += 1;
+      } else if (r.status === 'missed') g.missed += 1;
+      else if (r.status === 'pending') g.pending += 1;
+    }
+    return groups;
+  }
+
+  function searchMatch(text, query) {
+    if (!query) return true;
+    return text.toLowerCase().includes(query.toLowerCase());
+  }
+
+  function customerMatches(customer, query, shiftFilter, statusFilter) {
+    const s = currentStatus(customer, state.ui.selectedDate);
+    if (shiftFilter !== 'all' && customer.shift !== shiftFilter) return false;
+    if (statusFilter !== 'all' && s !== statusFilter) return false;
+    if (!query) return true;
+    const blob = [
+      customer.name, customer.address, customer.phone, customer.shift,
+      customer.milkType, qtyLabel(customer.quantityMl), customer.frequencyDays,
+      customer.status, customer.notes,
+      ...(customer.pausePeriods || []).flatMap(p => [p.start, p.end]),
+    ].join(' ').toLowerCase();
+    return blob.includes(query.toLowerCase());
+  }
+
+  function recordMatches(rec, query) {
+    if (!query) return true;
+    const c = getCustomer(rec.customerId);
+    const blob = [
+      rec.date, rec.status, rec.note, rec.shift, rec.milkType, qtyLabel(rec.quantityMl),
+      c?.name || '', c?.address || '', c?.phone || ''
+    ].join(' ').toLowerCase();
+    return blob.includes(query.toLowerCase());
+  }
+
+  function renderKpis() {
+    const today = state.ui.selectedDate;
+    const month = state.ui.selectedMonth;
+    const todays = recordsForDate(today);
+    const morning = todays.filter(r => {
+      const c = getCustomer(r.customerId);
+      return c && c.shift === 'Morning';
+    });
+    const evening = todays.filter(r => {
+      const c = getCustomer(r.customerId);
+      return c && c.shift === 'Evening';
+    });
+    const missed = todays.filter(r => r.status === 'missed');
+    const pausedToday = state.customers.filter(c => currentStatus(c, today) === 'paused');
+    const activeToday = state.customers.filter(c => currentStatus(c, today) === 'active');
+    const disabledToday = state.customers.filter(c => currentStatus(c, today) === 'disabled');
+    const dailyDelivered = todays.filter(r => r.status === 'delivered');
+    const dailyTotal = dailyDelivered.reduce((a, r) => a + Number(r.amount || 0), 0);
+    const dailyQty = dailyDelivered.reduce((a, r) => a + Number(r.quantityMl || 0), 0);
+    const monthTotals = billTotalsForMonth(month);
+
+    els.kpiMorning.textContent = morning.length.toString();
+    els.kpiMorningSmall.textContent = `${morning.filter(r => r.status === 'pending').length} pending • ${morning.filter(r => r.status === 'delivered').length} delivered`;
+    els.kpiEvening.textContent = evening.length.toString();
+    els.kpiEveningSmall.textContent = `${evening.filter(r => r.status === 'pending').length} pending • ${evening.filter(r => r.status === 'delivered').length} delivered`;
+    els.kpiMissed.textContent = missed.length.toString();
+    els.kpiPaused.textContent = pausedToday.length.toString();
+    els.kpiActive.textContent = activeToday.length.toString();
+    els.kpiDisabled.textContent = disabledToday.length.toString();
+    els.kpiDailyTotal.textContent = fmtMoney(dailyTotal);
+    els.kpiDailyQty.textContent = `${(dailyQty / 1000).toFixed(1).replace(/\.0$/, '')} litres`;
+    els.kpiMonthlyTotal.textContent = fmtMoney(monthTotals.total);
+    els.kpiMonthlyQty.textContent = `${(monthTotals.qty / 1000).toFixed(1).replace(/\.0$/, '')} litres`;
+    els.todayLabel.textContent = fmtDate(today);
+    els.selectedDateBadge.textContent = `Date: ${fmtDate(today)}`;
+    els.selectedMonthBadge.textContent = `Month: ${monthLabel(month)}`;
+    els.monthBadge.textContent = monthLabel(month);
+  }
+
+  function badgeForStatus(status) {
+    return `<span class="badge ${status}">${status}</span>`;
+  }
+
+  function renderTodayLists() {
+    const date = state.ui.selectedDate;
+    const query = state.ui.search.trim();
+    const records = recordsForDate(date).filter(r => recordMatches(r, query));
+    const morning = records.filter(r => {
+      const c = getCustomer(r.customerId);
+      return c && c.shift === 'Morning';
+    });
+    const evening = records.filter(r => {
+      const c = getCustomer(r.customerId);
+      return c && c.shift === 'Evening';
+    });
+    els.morningList.innerHTML = renderRecordCards(morning);
+    els.eveningList.innerHTML = renderRecordCards(evening);
+    els.dayRecordsAll.innerHTML = renderRecordCards(records.sort((a,b)=> (a.shift||'').localeCompare(b.shift||'') || (getCustomer(a.customerId)?.name||'').localeCompare(getCustomer(b.customerId)?.name||'')));
+  }
+
+  function renderRecordCards(records) {
+    if (!records.length) return `<div class="rowcard"><div class="meta">No records for this view.</div></div>`;
+    return records.map(r => {
+      const c = getCustomer(r.customerId);
+      const manual = r.manual ? 'manual' : 'auto';
+      const status = r.status || 'pending';
+      const statusClass = status === 'delivered' ? 'delivered' : status === 'missed' ? 'missed' : 'pending';
+      const current = c ? currentStatus(c, r.date) : 'disabled';
+      const cstatus = current === 'active' ? 'active' : current === 'paused' ? 'paused' : 'disabled';
+      return `
+        <div class="rowcard">
+          <div class="rowhead">
+            <div>
+              <div class="name">${c ? escapeHtml(c.name) : 'Unknown customer'}</div>
+              <div class="meta">
+                ${c ? escapeHtml(c.address || '') : ''}
+                ${c?.phone ? ' • ' + escapeHtml(c.phone) : ''}
+                <br>${fmtDate(r.date)} • ${r.shift || c?.shift || '-'} • ${milkName(r.milkType)} • ${qtyLabel(r.quantityMl)} • ${fmtMoney(r.amount)}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+              <span class="badge ${statusClass}">${status}</span>
+              <span class="badge ${cstatus}">${current}</span>
+              <span class="badge ${manual}">${manual}</span>
+            </div>
+          </div>
+          <div class="summaryline">
+            <div class="inline">
+              <button class="tiny good" data-action="mark-delivered" data-key="${escapeAttr(recordKey(r))}">Delivered</button>
+              <button class="tiny bad" data-action="mark-missed" data-key="${escapeAttr(recordKey(r))}">Missed</button>
+              <button class="tiny" data-action="edit-record" data-key="${escapeAttr(recordKey(r))}">Edit</button>
+            </div>
+            <div class="subtle">Amount: <strong>${fmtMoney(r.amount)}</strong></div>
+          </div>
+          <div class="hint">Note: ${escapeHtml(r.note || '—')}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function milkName(t){ return t === 'buffalo' ? 'Buffalo milk' : 'Cow milk'; }
+
+  function recordKey(record) {
+    return customerKey(record.customerId, record.date);
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+  }
+  function escapeAttr(str){ return escapeHtml(str); }
+
+  function renderCustomerList() {
+    const q = state.ui.search.trim();
+    const shiftFilter = state.ui.shiftFilter;
+    const statusFilter = state.ui.statusFilter;
+    const list = state.customers
+      .filter(c => customerMatches(c, q, shiftFilter, statusFilter))
+      .sort((a,b) => (currentStatus(a) + a.name).localeCompare(currentStatus(b) + b.name));
+    els.customerList.innerHTML = list.length ? list.map(c => {
+      const cs = currentStatus(c);
+      const pauses = pauseRanges(c).length ? pauseRanges(c).map(p => `${p.start} → ${p.end}`).join('<br>') : 'No pause ranges';
+      return `
+        <div class="rowcard">
+          <div class="rowhead">
+            <div>
+              <div class="name">${escapeHtml(c.name)}</div>
+              <div class="meta">
+                ${escapeHtml(c.address || 'No address')}
+                ${c.phone ? '<br>' + escapeHtml(c.phone) : ''}
+                <br>${c.shift} • ${milkName(c.milkType)} • ${qtyLabel(c.quantityMl)} • every ${c.frequencyDays} day(s)
+                <br>Start ${fmtDate(c.startDate)} • ${cs}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+              <span class="badge ${cs}">${cs}</span>
+              <span class="badge">${fmtMoney(calcAmount(c.quantityMl, c.milkType))}/day</span>
+            </div>
+          </div>
+          <div class="hint">Notes: ${escapeHtml(c.notes || '—')}</div>
+          <div class="hint">Pause ranges:<br>${pauses}</div>
+          <div class="customer-actions">
+            <button class="tiny primary" data-action="edit-customer" data-id="${escapeAttr(c.id)}">Edit</button>
+            <button class="tiny" data-action="set-pause" data-id="${escapeAttr(c.id)}">Add pause</button>
+            <button class="tiny" data-action="remove-pause" data-id="${escapeAttr(c.id)}">Remove last pause</button>
+            <button class="tiny bad" data-action="disable-customer" data-id="${escapeAttr(c.id)}">Disable</button>
+          </div>
+        </div>`;
+    }).join('') : `<div class="rowcard"><div class="meta">No customers match the current filters.</div></div>`;
+  }
+
+  function renderBills() {
+    const month = state.ui.selectedMonth;
+    const totals = totalsByCustomer(month);
+    const monthTotals = billTotalsForMonth(month);
+    const customers = [...state.customers].filter(c => !c.deleted);
+    const sorted = customers.sort((a,b)=>a.name.localeCompare(b.name));
+    els.monthlySummary.innerHTML = `
+      <div class="kpi"><span>Month</span><strong>${monthLabel(month)}</strong></div>
+      <div class="kpi"><span>Delivered amount</span><strong>${fmtMoney(monthTotals.total)}</strong></div>
+      <div class="kpi"><span>Delivered quantity</span><strong>${(monthTotals.qty / 1000).toFixed(1).replace(/\.0$/, '')} litres</strong></div>
+      <div class="kpi"><span>Delivered records</span><strong>${monthTotals.count}</strong></div>
+    `;
+
+    els.billList.innerHTML = sorted.map(c => {
+      const g = totals.get(c.id) || { amount:0, qty:0, delivered:0, missed:0, pending:0 };
+      const monthName = monthLabel(month);
+      const litres = (g.qty / 1000).toFixed(1).replace(/\.0$/, '');
+      const message = `Hello ${c.name}, your milk bill for ${monthName} is ${fmtMoney(g.amount)} for ${litres} litres.`;
+      const qtySummary = `${qtyLabel(c.quantityMl)} × ${g.delivered} delivery day(s)`;
+      return `
+        <div class="rowcard">
+          <div class="rowhead">
+            <div>
+              <div class="name">${escapeHtml(c.name)}</div>
+              <div class="meta">${escapeHtml(c.shift)} • ${milkName(c.milkType)} • ${qtyLabel(c.quantityMl)}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge">${fmtMoney(g.amount)}</span>
+              <span class="badge">${g.delivered} delivered</span>
+            </div>
+          </div>
+          <div class="hint">${qtySummary}</div>
+          <div class="pre">${escapeHtml(message)}</div>
+          <div class="btnrow">
+            <button class="tiny primary" data-action="copy-bill" data-id="${escapeAttr(c.id)}" data-message="${escapeAttr(message)}">Copy message</button>
+            <button class="tiny" data-action="copy-bill-details" data-id="${escapeAttr(c.id)}">Copy detailed bill</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    const short = sorted.slice(0, 5).map(c => {
+      const g = totals.get(c.id) || { amount:0, qty:0, delivered:0 };
+      return `<div class="rowcard">
+        <div class="rowhead">
+          <div>
+            <div class="name">${escapeHtml(c.name)}</div>
+            <div class="meta">${escapeHtml(c.shift)} • ${milkName(c.milkType)}</div>
+          </div>
+          <div class="badge">${fmtMoney(g.amount)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    els.billPreviewShort.innerHTML = short || '<div class="rowcard"><div class="meta">No customers yet.</div></div>';
+  }
+
+  function renderTodayGlance() {
+    const date = state.ui.selectedDate;
+    const recs = recordsForDate(date);
+    const items = [
+      { label:'Morning', value: recs.filter(r => getCustomer(r.customerId)?.shift === 'Morning').length },
+      { label:'Evening', value: recs.filter(r => getCustomer(r.customerId)?.shift === 'Evening').length },
+      { label:'Delivered', value: recs.filter(r => r.status === 'delivered').length },
+      { label:'Pending', value: recs.filter(r => r.status === 'pending').length },
+    ];
+    els.todayGlance.innerHTML = items.map(i => `<div class="kpi"><span>${i.label}</span><strong>${i.value}</strong></div>`).join('');
+  }
+
+  function renderBackupSettings() {
+    els.backupUrl.value = state.settings.backupUrl || '';
+    els.nightlyBackupEnabled.value = state.settings.nightlyBackupEnabled ? 'yes' : 'no';
+    els.backupTime.value = state.settings.backupTime || '23:30';
+    els.morningRefresh.value = state.settings.morningRefresh || '05:00';
+    els.eveningRefresh.value = state.settings.eveningRefresh || '17:00';
+    els.defaultViewMode.value = state.settings.defaultViewMode || 'current';
+    els.backupStatus.textContent = state.meta.lastBackupAt
+      ? `Last backup: ${state.meta.lastBackupAt}`
+      : 'No backup sent yet.';
+    els.refreshPill.textContent = `Morning ${state.settings.morningRefresh || '05:00'} • Evening ${state.settings.eveningRefresh || '17:00'}`;
+    els.backupPill.textContent = state.settings.nightlyBackupEnabled ? `Nightly backup: enabled (${state.settings.backupTime || '23:30'})` : 'Backup: local export';
+  }
+
+  function populatePauseCustomer() {
+    const items = state.customers.filter(c => !c.deleted).sort((a,b) => a.name.localeCompare(b.name));
+    els.pauseCustomer.innerHTML = items.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.name)} (${c.shift})</option>`).join('') || '<option value="">No customers</option>';
+  }
+
+  function renderAll() {
+    renderKpis();
+    renderTodayLists();
+    renderCustomerList();
+    renderBills();
+    renderTodayGlance();
+    renderBackupSettings();
+    populatePauseCustomer();
+  }
+
+  function clearCustomerForm() {
+    editingCustomerId = null;
+    els.custName.value = '';
+    els.custPhone.value = '';
+    els.custShift.value = 'Morning';
+    els.custAddress.value = '';
+    els.custMilk.value = 'cow';
+    els.custQty.value = 500;
+    els.custFreq.value = 1;
+    els.custStart.value = state.ui.selectedDate || todayStr();
+    els.custStatus.value = 'active';
+    els.custNotes.value = '';
+    els.saveCustomerBtn.textContent = 'Save customer';
+  }
+
+  function loadCustomerIntoForm(c) {
+    editingCustomerId = c.id;
+    els.custName.value = c.name || '';
+    els.custPhone.value = c.phone || '';
+    els.custShift.value = c.shift || 'Morning';
+    els.custAddress.value = c.address || '';
+    els.custMilk.value = c.milkType || 'cow';
+    els.custQty.value = c.quantityMl || 500;
+    els.custFreq.value = c.frequencyDays || 1;
+    els.custStart.value = c.startDate || todayStr();
+    els.custStatus.value = c.status === 'disabled' ? 'disabled' : 'active';
+    els.custNotes.value = c.notes || '';
+    els.saveCustomerBtn.textContent = 'Update customer';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function saveCustomer() {
+    const payload = {
+      name: emptyString(els.custName.value),
+      phone: emptyString(els.custPhone.value),
+      shift: els.custShift.value,
+      address: emptyString(els.custAddress.value),
+      milkType: els.custMilk.value,
+      quantityMl: Number(els.custQty.value || 500),
+      frequencyDays: Math.max(1, Number(els.custFreq.value || 1)),
+      startDate: els.custStart.value || state.ui.selectedDate || todayStr(),
+      status: els.custStatus.value === 'disabled' ? 'disabled' : 'active',
+      notes: emptyString(els.custNotes.value),
+    };
+    if (!payload.name) return alert('Customer name is required.');
+    if (!payload.address) return alert('Address is required.');
+    if (!payload.startDate) return alert('Start date is required.');
+    if (!Number.isFinite(payload.quantityMl) || payload.quantityMl < 500 || payload.quantityMl % 500 !== 0) {
+      return alert('Quantity must be 500 ml, 1000 ml, 1500 ml, etc. in 500 ml steps.');
+    }
+    if (editingCustomerId) {
+      const idx = state.customers.findIndex(c => c.id === editingCustomerId);
+      if (idx >= 0) {
+        const prev = state.customers[idx];
+        state.customers[idx] = {
+          ...prev,
+          ...payload,
+          pausePeriods: prev.pausePeriods || [],
+          deleted: false,
+          updatedAt: new Date().toISOString()
+        };
+      }
+    } else {
+      state.customers.push({
+        id: randomId(),
+        ...payload,
+        pausePeriods: [],
+        deleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    refreshSchedulesAfterChange();
+    clearCustomerForm();
+    saveState();
+  }
+
+  function refreshSchedulesAfterChange() {
+    // Only refresh the current month. This keeps history stable and updates today/current month automatically.
+    ensureMonthGenerated(state.ui.selectedMonth);
+    pruneRecordsForCurrentMonth(state.ui.selectedMonth);
+  }
+
+  function removeLastPause(customerId) {
+    const c = getCustomer(customerId);
+    if (!c) return;
+    if (!c.pausePeriods || !c.pausePeriods.length) return alert('No pause ranges found.');
+    c.pausePeriods.pop();
+    c.updatedAt = new Date().toISOString();
+    refreshSchedulesAfterChange();
+    saveState();
+  }
+
+  function addPause(customerId, start, end) {
+    const c = getCustomer(customerId);
+    if (!c) return;
+    if (!start || !end) return alert('Pause start and end are required.');
+    if (end < start) return alert('Pause end must be on or after pause start.');
+    c.pausePeriods = Array.isArray(c.pausePeriods) ? c.pausePeriods : [];
+    c.pausePeriods.push({ start, end, addedAt: new Date().toISOString() });
+    c.status = c.status === 'disabled' ? 'disabled' : 'active';
+    c.updatedAt = new Date().toISOString();
+    refreshSchedulesAfterChange();
+    saveState();
+  }
+
+  function disableCustomer(customerId) {
+    const c = getCustomer(customerId);
+    if (!c) return;
+    if (!confirm(`Disable ${c.name}? They will disappear from active delivery lists.`)) return;
+    c.status = 'disabled';
+    c.updatedAt = new Date().toISOString();
+    refreshSchedulesAfterChange();
+    saveState();
+  }
+
+  function editRecord(key) {
+    const rec = state.records[key];
+    if (!rec) return;
+    editingRecordKey = key;
+    els.recordEditorBox.classList.remove('hide');
+    els.recordEditorLabel.textContent = `${getCustomer(rec.customerId)?.name || 'Customer'} • ${fmtDate(rec.date)}`;
+    els.recordStatus.value = rec.status || 'pending';
+    els.recordMilk.value = rec.milkType || 'cow';
+    els.recordShift.value = rec.shift || getCustomer(rec.customerId)?.shift || 'Morning';
+    els.recordQty.value = rec.quantityMl || 500;
+    els.recordAmount.value = Number(rec.amount || 0);
+    els.recordDate.value = rec.date;
+    els.recordNote.value = rec.note || '';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
+  function closeRecordEditor() {
+    editingRecordKey = null;
+    els.recordEditorBox.classList.add('hide');
+  }
+
+  function saveRecord() {
+    if (!editingRecordKey || !state.records[editingRecordKey]) return;
+    const rec = state.records[editingRecordKey];
+    rec.status = els.recordStatus.value;
+    rec.milkType = els.recordMilk.value;
+    rec.shift = els.recordShift.value;
+    rec.quantityMl = Number(els.recordQty.value || 500);
+    rec.amount = Number(els.recordAmount.value || calcAmount(rec.quantityMl, rec.milkType));
+    rec.note = emptyString(els.recordNote.value);
+    rec.manual = true;
+    rec.updatedAt = new Date().toISOString();
+    saveState();
+    closeRecordEditor();
+  }
+
+  function setRecordStatus(key, status) {
+    const rec = state.records[key];
+    if (!rec) return;
+    rec.status = status;
+    rec.manual = true;
+    rec.updatedAt = new Date().toISOString();
+    saveState();
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => alert('Copied.'));
+    } else {
+      prompt('Copy:', text);
+    }
+  }
+
+  function exportData() {
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `milk-backup-${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importDataFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid backup');
+        state = normalizeImportedState(parsed);
+        await saveState(true);
+        alert('Backup imported.');
+      } catch (e) {
+        alert('Import failed: ' + e.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function normalizeImportedState(parsed) {
+    const base = defaultState();
+    const next = {
+      ...base,
+      ...parsed,
+      customers: Array.isArray(parsed.customers) ? parsed.customers : [],
+      records: parsed.records && typeof parsed.records === 'object' ? parsed.records : {},
+      settings: { ...base.settings, ...(parsed.settings || {}) },
+      ui: { ...base.ui, ...(parsed.ui || {}) },
+      meta: { ...base.meta, ...(parsed.meta || {}) },
+    };
+    next.customers = next.customers.map(c => ({
+      id: c.id || randomId(),
+      name: c.name || '',
+      address: c.address || '',
+      phone: c.phone || '',
+      shift: c.shift || 'Morning',
+      milkType: c.milkType || 'cow',
+      quantityMl: Number(c.quantityMl || 500),
+      frequencyDays: Math.max(1, Number(c.frequencyDays || 1)),
+      startDate: c.startDate || todayStr(),
+      status: c.status === 'disabled' ? 'disabled' : 'active',
+      pausePeriods: Array.isArray(c.pausePeriods) ? c.pausePeriods : [],
+      notes: c.notes || '',
+      deleted: !!c.deleted,
+      createdAt: c.createdAt || new Date().toISOString(),
+      updatedAt: c.updatedAt || new Date().toISOString(),
+    }));
+    for (const [k, r] of Object.entries(next.records)) {
+      next.records[k] = {
+        customerId: r.customerId,
+        date: r.date,
+        shift: r.shift || 'Morning',
+        milkType: r.milkType || 'cow',
+        quantityMl: Number(r.quantityMl || 500),
+        amount: Number(r.amount || 0),
+        status: r.status || 'pending',
+        note: r.note || '',
+        manual: !!r.manual,
+        source: r.source || 'auto',
+        createdAt: r.createdAt || new Date().toISOString(),
+        updatedAt: r.updatedAt || new Date().toISOString(),
+      };
+    }
+    next.ui.selectedDate = next.ui.selectedDate || todayStr();
+    next.ui.selectedMonth = next.ui.selectedMonth || monthStr(next.ui.selectedDate);
+    return next;
+  }
+
+  async function saveState(silent=false) {
+    state.meta.lastSavedAt = new Date().toISOString();
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => persistNow(silent), 100);
+  }
+
+  async function persistNow(silent=false) {
+    try {
+      await dbSet(APP_KEY, state);
+      if (!silent) {
+        // no-op toast replacement
+      }
+      els.storagePill.textContent = persistGranted ? 'Storage: persistent' : 'Storage: IndexedDB';
+      scheduleBackupCheck();
+      renderAll();
+    } catch (e) {
+      console.error(e);
+      alert('Save failed: ' + e.message);
+    }
+  }
+
+  async function loadState() {
+    db = await openDB();
+    const loaded = await dbGet(APP_KEY);
+    state = loaded ? normalizeImportedState(loaded) : defaultState();
+    if (!state.ui.selectedDate) state.ui.selectedDate = todayStr();
+    if (!state.ui.selectedMonth) state.ui.selectedMonth = monthStr(todayStr());
+    els.dateInput.value = state.ui.selectedDate;
+    els.monthInput.value = state.ui.selectedMonth;
+    els.searchInput.value = state.ui.search || '';
+    els.shiftFilter.value = state.ui.shiftFilter || 'all';
+    els.statusFilter.value = state.ui.statusFilter || 'all';
+    state.settings = { ...defaultState().settings, ...(state.settings || {}) };
+    state.meta = { ...defaultState().meta, ...(state.meta || {}) };
+    ensureCurrentMonth();
+    await dbSet(APP_KEY, state);
+  }
+
+  function tabSwitch(name) {
+    currentTab = name;
+    for (const [tabName, el] of Object.entries(els.tabs)) {
+      el.classList.toggle('hide', tabName !== name);
+    }
+    for (const btn of els.tabButtons) btn.classList.toggle('active', btn.dataset.tab === name);
+  }
+
+  function setSelectedDate(dateStr) {
+    state.ui.selectedDate = dateStr;
+    els.dateInput.value = dateStr;
+    if (monthStr(dateStr) === monthStr(state.ui.selectedMonth)) {
+      // keep month
+    }
+    renderAll();
+    saveState(true);
+  }
+
+  function setSelectedMonth(month) {
+    state.ui.selectedMonth = month;
+    els.monthInput.value = month;
+    ensureCurrentMonth();
+    renderAll();
+    saveState(true);
+  }
+
+  function recordActionHandler(e) {
+    const action = e.target?.dataset?.action;
+    if (!action) return;
+    const key = e.target.dataset.key;
+    const id = e.target.dataset.id;
+    const message = e.target.dataset.message;
+    if (action === 'mark-delivered') {
+      setRecordStatus(key, 'delivered');
+      renderAll();
+    } else if (action === 'mark-missed') {
+      setRecordStatus(key, 'missed');
+      renderAll();
+    } else if (action === 'edit-record') {
+      editRecord(key);
+    } else if (action === 'edit-customer') {
+      const c = getCustomer(id);
+      if (c) loadCustomerIntoForm(c);
+    } else if (action === 'disable-customer') {
+      disableCustomer(id);
+    } else if (action === 'set-pause') {
+      const c = getCustomer(id);
+      if (c) {
+        const start = prompt(`Pause start for ${c.name} (YYYY-MM-DD)`, state.ui.selectedDate);
+        if (!start) return;
+        const end = prompt(`Pause end for ${c.name} (YYYY-MM-DD)`, start);
+        if (!end) return;
+        addPause(id, start, end);
+      }
+    } else if (action === 'remove-pause') {
+      removeLastPause(id);
+    } else if (action === 'copy-bill') {
+      copyText(message || '');
+    } else if (action === 'copy-bill-details') {
+      const c = getCustomer(id);
+      if (!c) return;
+      const g = totalsByCustomer(state.ui.selectedMonth).get(c.id) || { amount:0, qty:0, delivered:0, missed:0, pending:0 };
+      const detail = [
+        `Customer: ${c.name}`,
+        `Month: ${monthLabel(state.ui.selectedMonth)}`,
+        `Milk: ${milkName(c.milkType)}`,
+        `Quantity/day: ${qtyLabel(c.quantityMl)}`,
+        `Delivered days: ${g.delivered}`,
+        `Missed days: ${g.missed}`,
+        `Total quantity: ${qtyLabel(g.qty)}`,
+        `Total amount: ${fmtMoney(g.amount)}`
+      ].join('\\n');
+      copyText(detail);
+    }
+  }
+
+  async function tryBackup(url) {
+    if (!url) {
+      els.backupStatus.textContent = 'No backup URL configured.';
+      return;
+    }
+    const payload = {
+      timestamp: new Date().toISOString(),
+      app: 'milk-delivery-manager',
+      state
+    };
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const txt = await res.text();
+      state.meta.lastBackupAt = new Date().toISOString();
+      await dbSet(APP_KEY, state);
+      els.backupStatus.textContent = `Backup sent: ${new Date().toLocaleString('en-IN')}\\nResponse: ${txt.slice(0, 250)}`;
+    } catch (e) {
+      els.backupStatus.textContent = `Backup failed: ${e.message}`;
+      alert('Backup failed: ' + e.message);
+    }
+  }
+
+  function backupDueNow() {
+    if (!state.settings.nightlyBackupEnabled || !state.settings.backupUrl) return false;
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const current = `${hh}:${mm}`;
+    if (current !== state.settings.backupTime) return false;
+    const today = todayStr();
+    if (lastBackupDate === today) return false;
+    lastBackupDate = today;
+    return true;
+  }
+
+  function scheduleBackupCheck() {
+    clearInterval(backupTimer);
+    backupTimer = setInterval(() => {
+      if (backupDueNow()) {
+        tryBackup(state.settings.backupUrl);
+      }
+    }, 60000);
+  }
+
+  async function requestPersistence() {
+    if (!navigator.storage || !navigator.storage.persist) {
+      alert('Persistent storage is not available in this browser.');
+      return;
+    }
+    const granted = await navigator.storage.persist();
+    persistGranted = granted;
+    els.storagePill.textContent = granted ? 'Storage: persistent' : 'Storage: not granted';
+    alert(granted ? 'Persistent storage enabled.' : 'Persistent storage was not granted.');
+  }
+
+  function bindEvents() {
+    els.tabButtons.forEach(btn => btn.addEventListener('click', () => tabSwitch(btn.dataset.tab)));
+    els.searchInput.addEventListener('input', () => {
+      state.ui.search = els.searchInput.value;
+      renderAll();
+      saveState(true);
+    });
+    els.shiftFilter.addEventListener('change', () => {
+      state.ui.shiftFilter = els.shiftFilter.value;
+      renderCustomerList();
+      saveState(true);
+    });
+    els.statusFilter.addEventListener('change', () => {
+      state.ui.statusFilter = els.statusFilter.value;
+      renderCustomerList();
+      saveState(true);
+    });
+    els.dateInput.addEventListener('change', () => setSelectedDate(els.dateInput.value || todayStr()));
+    els.monthInput.addEventListener('change', () => setSelectedMonth(els.monthInput.value || monthStr(todayStr())));
+    els.todayBtn.addEventListener('click', () => {
+      const t = todayStr();
+      setSelectedDate(t);
+      setSelectedMonth(monthStr(t));
+      tabSwitch('today');
+    });
+    els.saveCustomerBtn.addEventListener('click', saveCustomer);
+    els.clearCustomerBtn.addEventListener('click', clearCustomerForm);
+    els.addPauseBtn.addEventListener('click', () => {
+      const id = els.pauseCustomer.value;
+      addPause(id, els.pauseStart.value, els.pauseEnd.value);
+    });
+    els.removeLastPauseBtn.addEventListener('click', () => removeLastPause(els.pauseCustomer.value));
+    els.saveRecordBtn.addEventListener('click', saveRecord);
+    els.closeRecordBtn.addEventListener('click', closeRecordEditor);
+    els.exportBtn.addEventListener('click', exportData);
+    els.downloadExportBtn.addEventListener('click', exportData);
+    els.downloadTodayBtn.addEventListener('click', exportData);
+    els.copyBackupBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(JSON.stringify(state, null, 2)); alert('Backup JSON copied.'); }
+      catch { prompt('Copy backup JSON:', JSON.stringify(state, null, 2)); }
+    });
+    els.importBtn.addEventListener('click', () => els.importInput.click());
+    els.importInput.addEventListener('change', () => {
+      const file = els.importInput.files && els.importInput.files[0];
+      if (file) importDataFromFile(file);
+      els.importInput.value = '';
+    });
+    els.pasteImportBtn.addEventListener('click', async () => {
+      const txt = prompt('Paste backup JSON here');
+      if (!txt) return;
+      try {
+        const parsed = JSON.parse(txt);
+        state = normalizeImportedState(parsed);
+        await saveState(true);
+        alert('Backup restored.');
+      } catch (e) {
+        alert('Paste restore failed: ' + e.message);
+      }
+    });
+    els.wipeBtn.addEventListener('click', async () => {
+      if (!confirm('Erase all local data from this browser? Export first.')) return;
+      await dbDelete(APP_KEY);
+      state = defaultState();
+      await dbSet(APP_KEY, state);
+      clearCustomerForm();
+      renderAll();
+      alert('Local data erased.');
+    });
+    els.requestPersistBtn.addEventListener('click', requestPersistence);
+    els.persistBtn.addEventListener('click', requestPersistence);
+    els.saveSettingsBtn.addEventListener('click', () => {
+      state.settings.morningRefresh = els.morningRefresh.value || '05:00';
+      state.settings.eveningRefresh = els.eveningRefresh.value || '17:00';
+      state.settings.defaultViewMode = els.defaultViewMode.value || 'current';
+      saveState();
+      alert('Settings saved.');
+    });
+    els.saveBackupSettingsBtn.addEventListener('click', () => {
+      state.settings.backupUrl = els.backupUrl.value.trim();
+      state.settings.nightlyBackupEnabled = els.nightlyBackupEnabled.value === 'yes';
+      state.settings.backupTime = els.backupTime.value || '23:30';
+      saveState();
+      alert('Backup settings saved.');
+    });
+    els.testBackupBtn.addEventListener('click', () => tryBackup(els.backupUrl.value.trim()));
+    document.getElementById('dayRecordsAll').addEventListener('click', recordActionHandler);
+    document.getElementById('morningList').addEventListener('click', recordActionHandler);
+    document.getElementById('eveningList').addEventListener('click', recordActionHandler);
+    document.getElementById('customerList').addEventListener('click', recordActionHandler);
+    document.getElementById('billList').addEventListener('click', recordActionHandler);
+    document.getElementById('billPreviewShort').addEventListener('click', recordActionHandler);
+
+    document.querySelectorAll('button, input, select, textarea').forEach(el => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (el.tagName !== 'TEXTAREA')) {
+          e.preventDefault();
+        }
+      });
+    });
+  }
+
+  function openDefaultTab() {
+    const view = state.settings.defaultViewMode || 'current';
+    if (view === 'today') tabSwitch('today');
+    else tabSwitch('dashboard');
+  }
+
+  async function init() {
+    els.storagePill.textContent = 'Storage: loading…';
+    await loadState();
+    persistGranted = await (navigator.storage && navigator.storage.persisted ? navigator.storage.persisted() : Promise.resolve(false));
+    els.storagePill.textContent = persistGranted ? 'Storage: persistent' : 'Storage: IndexedDB';
+    bindEvents();
+
+    const today = todayStr();
+    els.dateInput.value = state.ui.selectedDate || today;
+    els.monthInput.value = state.ui.selectedMonth || monthStr(today);
+    clearCustomerForm();
+    renderAll();
+    openDefaultTab();
+
+    setInterval(() => {
+      const currentToday = todayStr();
+      if (state.ui.selectedDate !== currentToday) {
+        state.ui.selectedDate = currentToday;
+        els.dateInput.value = currentToday;
+        ensureCurrentMonth();
+        renderAll();
+        saveState(true);
+      }
+      const currentMonth = monthStr(currentToday);
+      if (state.ui.selectedMonth !== currentMonth && state.settings.defaultViewMode === 'current') {
+        state.ui.selectedMonth = currentMonth;
+        els.monthInput.value = currentMonth;
+      }
+      if (backupDueNow()) {
+        tryBackup(state.settings.backupUrl);
+      }
+    }, 60000);
+
+    // initial current month generation and a first render
+    ensureCurrentMonth();
+    renderAll();
+    await saveState(true);
+  }
+
+  init().catch(err => {
+    console.error(err);
+    alert('App failed to start: ' + err.message);
+  });
+})();
+</script>
+</body>
+</html>
